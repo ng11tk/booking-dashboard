@@ -1,5 +1,7 @@
 // src/pages/BatchFormPage.jsx
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useQuery } from "@apollo/client/react/index.js";
+import { GET_BATCHES, GET_TREKS } from "../graphql/queries.js";
 import CreateBatch from "../components/createBatch.jsx";
 
 function BatchFormPage() {
@@ -7,17 +9,29 @@ function BatchFormPage() {
   const [searchParams] = useSearchParams();
   const trekId = searchParams.get("trekId");
 
+  const { data: trekData } = useQuery(GET_TREKS);
+  const { data, loading, refetch } = useQuery(GET_BATCHES, {
+    variables: { trekId },
+    skip: !trekId,
+  });
+
+  const currentTrek = trekData?.treks?.find((trek) => trek.id === trekId);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-blue-100 py-8 px-4">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header Card */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-800 mb-1 bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-                Create New Batch
+                Batch Management
               </h1>
-              <p className="text-gray-600">Schedule a new trek batch</p>
+              <p className="text-gray-600">
+                {currentTrek
+                  ? `Create and view batches for ${currentTrek.name}`
+                  : "Create and view trek batches"}
+              </p>
             </div>
             <button
               onClick={() => navigate("/")}
@@ -41,10 +55,167 @@ function BatchFormPage() {
           </div>
         </div>
 
-        {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          <CreateBatch trekId={trekId || "695b9343876e94a9e90d984a"} />
-        </div>
+        {!trekId ? (
+          <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+            <svg
+              className="w-16 h-16 text-gray-300 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+            <p className="text-xl text-gray-700 font-medium mb-2">
+              No Trek Selected
+            </p>
+            <p className="text-gray-600 mb-6">
+              Please select a trek from the homepage to create a batch
+            </p>
+            <button
+              onClick={() => navigate("/")}
+              className="px-6 py-3 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg font-semibold transition-colors"
+            >
+              Go to Homepage
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Form Card */}
+            <div className="bg-white rounded-2xl shadow-lg p-8">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <svg
+                  className="w-6 h-6 text-cyan-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Create New Batch
+              </h2>
+              <CreateBatch trekId={trekId} onSuccess={() => refetch()} />
+            </div>
+
+            {/* Batch Details List */}
+            <div className="bg-white rounded-2xl shadow-lg p-8">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <svg
+                  className="w-6 h-6 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+                Existing Batches
+              </h2>
+
+              {loading ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-cyan-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading batches...</p>
+                </div>
+              ) : data?.batches?.length === 0 ? (
+                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                  <svg
+                    className="w-16 h-16 text-gray-300 mx-auto mb-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <p className="text-gray-500 font-medium">No batches yet</p>
+                  <p className="text-sm text-gray-400 mt-2">
+                    Create the first batch for this trek
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                  {data?.batches?.map((batch) => (
+                    <div
+                      key={batch.id}
+                      className="p-5 bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 rounded-xl hover:shadow-lg transition-all"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-bold text-lg text-gray-900">
+                          {new Date(batch.startDate).toLocaleDateString(
+                            "en-US",
+                            {
+                              weekday: "long",
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            }
+                          )}
+                        </h3>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            batch.status === "active"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {batch.status}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-4 mb-3">
+                        <div className="bg-white p-3 rounded-lg">
+                          <p className="text-xs text-gray-600 mb-1">Capacity</p>
+                          <p className="text-lg font-bold text-gray-900">
+                            {batch.capacity}
+                          </p>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg">
+                          <p className="text-xs text-gray-600 mb-1">Booked</p>
+                          <p className="text-lg font-bold text-cyan-600">
+                            {batch.bookedSeats}
+                          </p>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg">
+                          <p className="text-xs text-gray-600 mb-1">
+                            Available
+                          </p>
+                          <p className="text-lg font-bold text-green-600">
+                            {batch.capacity - batch.bookedSeats}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="pt-3 border-t border-cyan-300">
+                        <p className="text-xs text-gray-600">Batch ID:</p>
+                        <p className="text-xs font-mono text-gray-900 break-all">
+                          {batch.id}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

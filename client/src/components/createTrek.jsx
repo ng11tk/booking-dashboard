@@ -4,7 +4,7 @@ import { useMutation } from "@apollo/client/react/index.js";
 import { CREATE_TREK } from "../graphql/mutations.js";
 import { GET_TREKS } from "../graphql/queries.js";
 
-const CreateTrek = () => {
+const CreateTrek = ({ onSuccess }) => {
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
   const [durationDays, setDurationDays] = useState("");
@@ -34,6 +34,7 @@ const CreateTrek = () => {
       setName("");
       setLocation("");
       setDurationDays("");
+      if (onSuccess) onSuccess();
     } catch (error) {
       console.error("Error creating trek:", error);
       alert("Failed to create trek");

@@ -4,7 +4,7 @@ import { useMutation } from "@apollo/client/react/index.js";
 import { CREATE_BATCH } from "../graphql/mutations.js";
 import { GET_BATCHES } from "../graphql/queries.js";
 
-const CreateBatch = ({ trekId }) => {
+const CreateBatch = ({ trekId, onSuccess }) => {
   const [startDate, setStartDate] = useState("");
   const [capacity, setCapacity] = useState("");
 
@@ -37,6 +37,7 @@ const CreateBatch = ({ trekId }) => {
       alert("Batch created successfully!");
       setStartDate("");
       setCapacity("");
+      if (onSuccess) onSuccess();
     } catch (error) {
       console.error("Error creating batch:", error);
       alert("Failed to create batch");
