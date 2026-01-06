@@ -1,0 +1,24 @@
+{
+  "name": "booking-dashboard",
+  "version": "1.0.0",
+  "description": "Trek booking dashboard - full stack application",
+  "scripts": {
+    "client": "cd client && npm run dev",
+    "server": "cd server && npm run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "install-client": "cd client && npm install",
+    "install-server": "cd server && npm install",
+    "install-all": "npm install && npm run install-client && npm run install-server",
+    "build": "cd client && npm run build"
+  },
+  "keywords": [
+    "booking",
+    "dashboard",
+    "trek"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

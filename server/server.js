@@ -1,0 +1,23 @@
+// server.js
+import Fastify from "fastify";
+import mercurius from "mercurius";
+import cors from "@fastify/cors";
+import connectDB from "./configs/database.js";
+import { typeDefs } from "./graphql/schema.js";
+import { resolvers } from "./graphql/resolvers.js";
+
+const app = Fastify();
+
+await connectDB();
+
+app.register(cors, { origin: true });
+
+app.register(mercurius, {
+  schema: typeDefs,
+  resolvers,
+  graphiql: true,
+});
+
+app.listen({ port: 4000 }, () => {
+  console.log("🚀 Backend running at http://localhost:4000/graphiql");
+});
