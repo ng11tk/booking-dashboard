@@ -44,7 +44,48 @@ export const resolvers = {
     },
 
     updateBookingStatus: async (_, { id, status }) => {
-      return Booking.findByIdAndUpdate(id, { status }, { new: true });
+      const booking = await Booking.findById(id);
+      const oldStatus = booking.status;
+
+      // Update the booking status
+      booking.status = status;
+
+      // Update batch booked seats based on status change
+      const batch = await Batch.findById(booking.batchId);
+
+      // If changing FROM CONFIRMED to something else, decrease booked seats
+      if (oldStatus === "CONFIRMED" && status !== "CONFIRMED") {
+        batch.bookedSeats = Math.max(0, batch.bookedSeats - 1);
+        await booking.save();
+      }
+
+      // If changing TO CONFIRMED from something else, increase booked seats
+      if (oldStatus !== "CONFIRMED") {
+        if (status === "CONFIRMED") {
+          if (batch.bookedSeats < batch.capacity) {
+            batch.bookedSeats += 1;
+            await booking.save();
+          } else {
+            // Cannot confirm booking if batch is full
+            throw new Error("Cannot confirm booking: batch is full.");
+          }
+        } else {
+          await booking.save();
+        }
+      }
+
+      // Update batch status based on booked seats
+      if (batch.bookedSeats >= batch.capacity) {
+        batch.status = "FULL";
+      } else if (batch.bookedSeats === 0) {
+        batch.status = "OPEN";
+      } else {
+        batch.status = "OPEN";
+      }
+
+      await batch.save();
+
+      return booking;
     },
 
     createBatch: async (_, { trekId, startDate, capacity }) => {

@@ -1,7 +1,8 @@
 // src/pages/HomePage.jsx
 import { useState } from "react";
-import { useQuery } from "@apollo/client/react/index.js";
+import { useQuery, useMutation } from "@apollo/client/react/index.js";
 import { GET_TREKS, GET_BATCHES, GET_BOOKINGS } from "../graphql/queries.js";
+import { UPDATE_BOOKING_STATUS } from "../graphql/mutations.js";
 import { useNavigate } from "react-router-dom";
 
 function HomePage() {
@@ -9,6 +10,13 @@ function HomePage() {
   const { data, loading } = useQuery(GET_TREKS);
   const [selectedTrek, setSelectedTrek] = useState(null);
   const [selectedBatch, setSelectedBatch] = useState(null);
+
+  const [updateBookingStatus] = useMutation(UPDATE_BOOKING_STATUS, {
+    refetchQueries: [
+      { query: GET_BOOKINGS, variables: { batchId: selectedBatch?.id } },
+      { query: GET_BATCHES, variables: { trekId: selectedTrek?.id } },
+    ],
+  });
 
   const { data: batchData, loading: batchLoading } = useQuery(GET_BATCHES, {
     variables: { trekId: selectedTrek?.id },
@@ -22,6 +30,16 @@ function HomePage() {
       skip: !selectedBatch,
     }
   );
+
+  const handleStatusChange = async (bookingId, newStatus) => {
+    try {
+      await updateBookingStatus({
+        variables: { id: bookingId, status: newStatus },
+      });
+    } catch (error) {
+      console.error("Error updating booking status:", error);
+    }
+  };
 
   if (loading) {
     return (
@@ -459,17 +477,26 @@ function HomePage() {
                               </p>
                             </div>
                           </div>
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              booking.status === "confirmed"
-                                ? "bg-green-100 text-green-700"
-                                : booking.status === "pending"
-                                ? "bg-yellow-100 text-yellow-700"
-                                : "bg-gray-100 text-gray-700"
+                          <select
+                            value={booking.status}
+                            onChange={(e) =>
+                              handleStatusChange(booking.id, e.target.value)
+                            }
+                            className={`px-3 py-1 rounded-full text-xs font-semibold border-2 cursor-pointer transition-all ${
+                              booking.status === "CONFIRMED"
+                                ? "bg-green-100 text-green-700 border-green-300 hover:bg-green-200"
+                                : booking.status === "PENDING"
+                                ? "bg-yellow-100 text-yellow-700 border-yellow-300 hover:bg-yellow-200"
+                                : booking.status === "WAITLISTED"
+                                ? "bg-orange-100 text-orange-700 border-orange-300 hover:bg-orange-200"
+                                : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
                             }`}
                           >
-                            {booking.status}
-                          </span>
+                            <option value="CONFIRMED">CONFIRMED</option>
+                            <option value="PENDING">PENDING</option>
+                            <option value="WAITLISTED">WAITLISTED</option>
+                            <option value="CANCELLED">CANCELLED</option>
+                          </select>
                         </div>
                       </div>
                     ))}
