@@ -1,18 +1,21 @@
 // src/components/CreateBatch.jsx
 import { useState } from "react";
-import { useMutation } from "@apollo/client/react/index.js";
+import { useMutation, useQuery } from "@apollo/client/react/index.js";
 import { CREATE_BATCH } from "../graphql/mutations.js";
-import { GET_BATCHES } from "../graphql/queries.js";
+import { GET_BATCHES, GET_TREKS } from "../graphql/queries.js";
 
-const CreateBatch = ({ trekId, onSuccess }) => {
+const CreateBatch = ({ trekId: initialTrekId, onSuccess }) => {
+  const [selectedTrekId, setSelectedTrekId] = useState(initialTrekId || "");
   const [startDate, setStartDate] = useState("");
   const [capacity, setCapacity] = useState("");
+
+  const { data: trekData, loading: treksLoading } = useQuery(GET_TREKS);
 
   const [createBatch, { loading }] = useMutation(CREATE_BATCH, {
     refetchQueries: [
       {
         query: GET_BATCHES,
-        variables: { trekId },
+        variables: { trekId: selectedTrekId },
       },
     ],
   });
@@ -20,7 +23,7 @@ const CreateBatch = ({ trekId, onSuccess }) => {
   const submit = async (e) => {
     e.preventDefault();
 
-    if (!startDate || !capacity) {
+    if (!selectedTrekId || !startDate || !capacity) {
       alert("Please fill in all fields");
       return;
     }
@@ -28,13 +31,14 @@ const CreateBatch = ({ trekId, onSuccess }) => {
     try {
       await createBatch({
         variables: {
-          trekId,
-          startDate,
+          trekId: selectedTrekId,
+          startDate: new Date(startDate + "T00:00:00").toISOString(),
           capacity: Number(capacity),
         },
       });
 
       alert("Batch created successfully!");
+      setSelectedTrekId(initialTrekId || "");
       setStartDate("");
       setCapacity("");
       if (onSuccess) onSuccess();
@@ -48,18 +52,33 @@ const CreateBatch = ({ trekId, onSuccess }) => {
     <form onSubmit={submit} className="space-y-5">
       <div className="space-y-2">
         <label
-          htmlFor="trek-id"
+          htmlFor="trek-name"
           className="block text-sm font-semibold text-gray-700"
         >
-          Trek ID
+          Trek Name <span className="text-red-500">*</span>
         </label>
-        <input
-          id="trek-id"
-          type="text"
-          value={trekId}
-          readOnly
-          className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 cursor-not-allowed font-mono text-sm"
-        />
+        {treksLoading ? (
+          <div className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-500 flex items-center gap-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-cyan-600"></div>
+            Loading treks...
+          </div>
+        ) : (
+          <select
+            id="trek-name"
+            value={selectedTrekId}
+            onChange={(e) => setSelectedTrekId(e.target.value)}
+            required
+            disabled={!!initialTrekId}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+          >
+            <option value="">Select a trek...</option>
+            {trekData?.treks?.map((trek) => (
+              <option key={trek.id} value={trek.id}>
+                {trek.name} - {trek.location}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -75,6 +94,7 @@ const CreateBatch = ({ trekId, onSuccess }) => {
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
           required
+          min={new Date().toISOString().split("T")[0]}
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
         />
       </div>
