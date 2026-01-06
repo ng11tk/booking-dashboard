@@ -7,7 +7,18 @@ import Booking from "../modals/booking.js";
 export const resolvers = {
   Query: {
     treks: () => Trek.find(),
-    batches: (_, { trekId }) => Batch.find({ trekId }),
+    batches: async (_, { trekId }) => {
+      const batches = await Batch.find({ trekId });
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Filter out batches whose start date has passed
+      return batches.filter((batch) => {
+        const batchDate = new Date(batch.startDate);
+        batchDate.setHours(0, 0, 0, 0);
+        return batchDate >= today;
+      });
+    },
     bookings: (_, { batchId }) => Booking.find({ batchId }),
   },
 
