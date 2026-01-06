@@ -9,7 +9,13 @@
     "install-client": "cd client && npm install",
     "install-server": "cd server && npm install",
     "install-all": "npm install && npm run install-client && npm run install-server",
-    "build": "cd client && npm run build"
+    "build": "cd client && npm run build",
+    "start-server": "cd server && node server.js",
+    "docker:build": "docker build -t booking-dashboard .",
+    "docker:run": "docker run -p 4000:4000 --env-file server/.env booking-dashboard",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
   },
   "keywords": [
     "booking",

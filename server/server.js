@@ -19,6 +19,8 @@ app.register(mercurius, {
   graphiql: true,
 });
 
-app.listen({ port: 4000 }, () => {
-  console.log("🚀 Backend running at http://localhost:4000/graphiql");
+const PORT = process.env.PORT || 4000;
+
+app.listen({ port: PORT, host: "0.0.0.0" }, () => {
+  console.log(`🚀 Backend running at http://localhost:${PORT}/graphiql`);
 });

@@ -1,0 +1,69 @@
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: booking-dashboard-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: booking-dashboard
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - booking-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/booking-dashboard --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Server
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: booking-dashboard-server
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb+srv://ng11tk:TestMongo123@namastenode.qpvbswo.mongodb.net/booking-dashboard
+      - PORT=4000
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    networks:
+      - booking-network
+    command: npm run dev
+
+  # Frontend Client
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: booking-dashboard-client
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:4000/graphql
+    depends_on:
+      - server
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    networks:
+      - booking-network
+    command: npm run dev -- --host
+
+networks:
+  booking-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
