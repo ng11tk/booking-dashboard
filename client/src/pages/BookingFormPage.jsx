@@ -50,144 +50,166 @@ const BookingFormPage = () => {
   };
 
   return (
-    <div style={{ padding: "40px", maxWidth: "600px", margin: "0 auto" }}>
-      <h1>Create New Booking</h1>
-      <button
-        onClick={() => navigate("/")}
-        style={{
-          marginBottom: "20px",
-          padding: "8px 16px",
-          cursor: "pointer",
-        }}
-      >
-        ← Back to Dashboard
-      </button>
-
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "16px",
-          padding: "24px",
-          border: "1px solid #ddd",
-          borderRadius: "8px",
-          backgroundColor: "#f9f9f9",
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <label
-            htmlFor="batchId"
-            style={{ marginBottom: "8px", fontWeight: "bold" }}
-          >
-            Batch ID *
-          </label>
-          <input
-            id="batchId"
-            type="text"
-            value={batchId || ""}
-            readOnly
-            placeholder="Batch ID (from URL)"
-            style={{
-              padding: "10px",
-              fontSize: "14px",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              backgroundColor: "#e9e9e9",
-            }}
-          />
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <label
-            htmlFor="travelerName"
-            style={{ marginBottom: "8px", fontWeight: "bold" }}
-          >
-            Traveler Name *
-          </label>
-          <input
-            id="travelerName"
-            type="text"
-            placeholder="Enter traveler name"
-            value={travelerName}
-            onChange={(e) => setTravelerName(e.target.value)}
-            required
-            style={{
-              padding: "10px",
-              fontSize: "14px",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-            }}
-          />
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <label
-            htmlFor="email"
-            style={{ marginBottom: "8px", fontWeight: "bold" }}
-          >
-            Email (Optional)
-          </label>
-          <input
-            id="email"
-            type="email"
-            placeholder="Enter email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{
-              padding: "10px",
-              fontSize: "14px",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-            }}
-          />
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <label
-            htmlFor="phone"
-            style={{ marginBottom: "8px", fontWeight: "bold" }}
-          >
-            Phone (Optional)
-          </label>
-          <input
-            id="phone"
-            type="tel"
-            placeholder="Enter phone number"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            style={{
-              padding: "10px",
-              fontSize: "14px",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-            }}
-          />
-        </div>
-
-        {error && (
-          <div style={{ color: "red", fontSize: "14px" }}>
-            Error: {error.message}
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 py-8 px-4">
+      <div className="max-w-2xl mx-auto">
+        {/* Header Card */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800 mb-1 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                Create New Booking
+              </h1>
+              <p className="text-gray-600">Register a new traveler</p>
+            </div>
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200 font-medium"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+              Back
+            </button>
           </div>
-        )}
+        </div>
 
-        <button
-          type="submit"
-          disabled={loading || !batchId}
-          style={{
-            padding: "12px",
-            fontSize: "16px",
-            fontWeight: "bold",
-            backgroundColor: loading || !batchId ? "#ccc" : "#007bff",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: loading || !batchId ? "not-allowed" : "pointer",
-          }}
+        {/* Form Card */}
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-2xl shadow-lg p-8 space-y-6"
         >
-          {loading ? "Creating Booking..." : "Create Booking"}
-        </button>
-      </form>
+          <div className="space-y-2">
+            <label
+              htmlFor="batchId"
+              className="block text-sm font-semibold text-gray-700"
+            >
+              Batch ID <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="batchId"
+              type="text"
+              value={batchId || ""}
+              readOnly
+              placeholder="Batch ID (from URL)"
+              className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent cursor-not-allowed"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label
+              htmlFor="travelerName"
+              className="block text-sm font-semibold text-gray-700"
+            >
+              Traveler Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="travelerName"
+              type="text"
+              placeholder="Enter traveler name"
+              value={travelerName}
+              onChange={(e) => setTravelerName(e.target.value)}
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label
+              htmlFor="email"
+              className="block text-sm font-semibold text-gray-700"
+            >
+              Email <span className="text-gray-400 text-xs">(Optional)</span>
+            </label>
+            <input
+              id="email"
+              type="email"
+              placeholder="Enter email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label
+              htmlFor="phone"
+              className="block text-sm font-semibold text-gray-700"
+            >
+              Phone <span className="text-gray-400 text-xs">(Optional)</span>
+            </label>
+            <input
+              id="phone"
+              type="tel"
+              placeholder="Enter phone number"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+            />
+          </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+              <svg
+                className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <div>
+                <p className="text-sm font-semibold text-red-800">Error</p>
+                <p className="text-sm text-red-700">{error.message}</p>
+              </div>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading || !batchId}
+            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                Creating Booking...
+              </>
+            ) : (
+              <>
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                Create Booking
+              </>
+            )}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
